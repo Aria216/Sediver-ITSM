@@ -3,1129 +3,1075 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sediver ITSM | Project Dashboard</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>SEDIVER ITSM Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #1e3a5f;
-            --primary-light: #2d5a87;
-            --accent: #0ea5e9;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --purple: #8b5cf6;
-            --gray-50: #f8fafc;
-            --gray-100: #f1f5f9;
-            --gray-200: #e2e8f0;
-            --gray-300: #cbd5e1;
-            --gray-400: #94a3b8;
-            --gray-500: #64748b;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --gray-800: #1e293b;
-            --gray-900: #0f172a;
-        }
-
-        body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--gray-100);
-            color: var(--gray-800);
-            line-height: 1.5;
-        }
-
-        /* === HEADER === */
-        .header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            padding: 2rem 3rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-content h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .header-content p {
-            opacity: 0.85;
-            font-size: 0.9rem;
-        }
-
-        .header-stats {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .header-stat {
-            text-align: center;
-            padding: 0.75rem 1.5rem;
-            background: rgba(255,255,255,0.1);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-        }
-
-        .header-stat .value {
-            font-size: 2rem;
-            font-weight: 700;
-        }
-
-        .header-stat .label {
-            font-size: 0.75rem;
-            opacity: 0.85;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .header-stat.danger .value {
-            color: #fca5a5;
-        }
-
-        /* === MAIN LAYOUT === */
-        .main {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .section {
-            margin-bottom: 2rem;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--gray-700);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 20px;
-            background: var(--accent);
-            border-radius: 2px;
-        }
-
-        /* === CARDS === */
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--gray-200);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-header h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--gray-800);
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        /* === GRID LAYOUTS === */
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-        }
-
-        .grid-3 {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-        }
-
-        /* === KPI CARDS === */
-        .kpi-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .kpi-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .kpi-icon.blue { background: #dbeafe; }
-        .kpi-icon.green { background: #d1fae5; }
-        .kpi-icon.orange { background: #ffedd5; }
-        .kpi-icon.red { background: #fee2e2; }
-        .kpi-icon.purple { background: #ede9fe; }
-
-        .kpi-content .value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--gray-800);
-        }
-
-        .kpi-content .label {
-            font-size: 0.8rem;
-            color: var(--gray-500);
-        }
-
-        /* === PHASE PROGRESS === */
-        .phase-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .phase-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .phase-name {
-            min-width: 100px;
-            font-weight: 500;
-            font-size: 0.875rem;
-            color: var(--gray-700);
-        }
-
-        .phase-bar {
-            flex: 1;
-            height: 28px;
-            background: var(--gray-100);
-            border-radius: 14px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .phase-fill {
-            height: 100%;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 12px;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: 600;
-            transition: width 0.5s ease;
-        }
-
-        .phase-dates {
-            min-width: 140px;
-            text-align: right;
-            font-size: 0.8rem;
-            color: var(--gray-500);
-        }
-
-        /* === TABLE === */
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.875rem;
-        }
-
-        thead {
-            background: var(--gray-50);
-        }
-
-        th {
-            padding: 0.875rem 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--gray-600);
-            border-bottom: 2px solid var(--gray-200);
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 0.875rem 1rem;
-            border-bottom: 1px solid var(--gray-100);
-            vertical-align: middle;
-        }
-
-        tbody tr:hover {
-            background: var(--gray-50);
-        }
-
-        tbody tr.critical {
-            background: #fef2f2;
-        }
-
-        tbody tr.critical:hover {
-            background: #fee2e2;
-        }
-
-        /* === BADGES === */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .badge-blue { background: #dbeafe; color: #1e40af; }
-        .badge-green { background: #d1fae5; color: #065f46; }
-        .badge-orange { background: #ffedd5; color: #9a3412; }
-        .badge-purple { background: #ede9fe; color: #5b21b6; }
-        .badge-red { background: #fee2e2; color: #991b1b; }
-        .badge-gray { background: #f1f5f9; color: #475569; }
-
-        .status-badge {
-            padding: 0.375rem 0.875rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .status-not-started { background: var(--gray-100); color: var(--gray-600); }
-        .status-in-progress { background: #dbeafe; color: #1e40af; }
-        .status-completed { background: #d1fae5; color: #065f46; }
-        .status-blocked { background: #fee2e2; color: #991b1b; }
-
-        .priority-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-
-        .priority-alta { background: var(--danger); }
-        .priority-media { background: var(--warning); }
-        .priority-bassa { background: var(--success); }
-
-        /* === TASK NAME === */
-        .task-name {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .task-name .critical-icon {
-            color: var(--danger);
-            font-weight: bold;
-        }
-
-        .task-name .milestone-icon {
-            color: var(--purple);
-        }
-
-        /* === GANTT === */
-        .gantt-container {
-            overflow-x: auto;
-            padding: 1rem 0;
-        }
-
-        #gantt-chart {
-            min-height: 500px;
-        }
-
-        .gantt-legend {
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--gray-600);
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-        }
-
-        /* === CRITICAL PATH === */
-        .critical-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .critical-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--gray-50);
-            border-radius: 10px;
-            border-left: 4px solid var(--danger);
-        }
-
-        .critical-item .number {
-            width: 28px;
-            height: 28px;
-            background: var(--danger);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .critical-item .info {
-            flex: 1;
-        }
-
-        .critical-item .name {
-            font-weight: 500;
-            color: var(--gray-800);
-            margin-bottom: 0.125rem;
-        }
-
-        .critical-item .dates {
-            font-size: 0.8rem;
-            color: var(--gray-500);
-        }
-
-        .critical-item .impact {
-            text-align: right;
-            font-size: 0.75rem;
-        }
-
-        .critical-item .impact .label {
-            color: var(--gray-500);
-        }
-
-        .critical-item .impact .value {
-            color: var(--danger);
-            font-weight: 600;
-        }
-
-        /* === RISK SECTION === */
-        .risk-grid {
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 1.5rem;
-        }
-
-        .risk-matrix {
-            display: grid;
-            grid-template-columns: 24px repeat(3, 1fr);
-            grid-template-rows: repeat(3, 50px) 24px;
-            gap: 2px;
-            background: var(--gray-200);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .risk-matrix .cell {
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            color: var(--gray-500);
-        }
-
-        .risk-matrix .cell.y-axis {
-            writing-mode: vertical-lr;
-            transform: rotate(180deg);
-            font-weight: 500;
-        }
-
-        .risk-matrix .cell.x-axis {
-            font-weight: 500;
-        }
-
-        .risk-matrix .cell.low { background: #d1fae5; }
-        .risk-matrix .cell.medium { background: #fef3c7; }
-        .risk-matrix .cell.high { background: #fee2e2; }
-
-        .risk-dot {
-            width: 22px;
-            height: 22px;
-            background: var(--primary);
-            color: white;
-            border-radius: 50%;
-            font-size: 0.65rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .risk-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .risk-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 1rem;
-            background: var(--gray-50);
-            border-radius: 8px;
-            border-left: 4px solid;
-        }
-
-        .risk-item.low { border-left-color: var(--success); }
-        .risk-item.medium { border-left-color: var(--warning); }
-        .risk-item.high { border-left-color: var(--danger); }
-
-        .risk-item .name {
-            font-weight: 500;
-            font-size: 0.875rem;
-            color: var(--gray-800);
-        }
-
-        .risk-item .category {
-            font-size: 0.75rem;
-            color: var(--gray-500);
-        }
-
-        .risk-score {
-            padding: 0.25rem 0.625rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .risk-score.low { background: #d1fae5; color: #065f46; }
-        .risk-score.medium { background: #fef3c7; color: #92400e; }
-        .risk-score.high { background: #fee2e2; color: #991b1b; }
-
-        /* === FOOTER === */
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            color: var(--gray-500);
-            font-size: 0.8rem;
-            border-top: 1px solid var(--gray-200);
-            margin-top: 2rem;
-        }
-
-        /* === RESPONSIVE === */
-        @media (max-width: 1200px) {
-            .grid-4 { grid-template-columns: repeat(2, 1fr); }
-            .grid-3 { grid-template-columns: 1fr; }
-            .risk-grid { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 768px) {
-            .header { flex-direction: column; gap: 1.5rem; text-align: center; }
-            .header-stats { flex-wrap: wrap; justify-content: center; }
-            .grid-4, .grid-2 { grid-template-columns: 1fr; }
-            .main { padding: 1rem; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        body { font-family: 'Inter', sans-serif; }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        .animate-slide-up { animation: slideUp 0.3s ease-out; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        
+        .card-interactive { transition: all 0.2s ease; cursor: pointer; }
+        .card-interactive:hover { transform: translateY(-2px); box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1); }
+        
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .dark .glass { background: rgba(30, 41, 59, 0.8); }
+        
+        .gantt-bar { transition: all 0.2s ease; cursor: pointer; }
+        .gantt-bar:hover { filter: brightness(1.1); transform: scaleY(1.3); }
+        
+        .status-non-iniziato { background: #f1f5f9; color: #64748b; }
+        .status-in-corso { background: #fef3c7; color: #d97706; }
+        .status-completato { background: #d1fae5; color: #059669; }
+        .status-bloccato { background: #fee2e2; color: #dc2626; }
+        
+        .priority-alta { border-left: 4px solid #ef4444; }
+        .priority-media { border-left: 4px solid #f59e0b; }
+        .priority-bassa { border-left: 4px solid #94a3b8; }
+        
+        .risk-alto { border-left: 4px solid #ef4444; background: linear-gradient(90deg, rgba(239,68,68,0.1) 0%, transparent 100%); }
+        .risk-medio { border-left: 4px solid #f59e0b; background: linear-gradient(90deg, rgba(245,158,11,0.1) 0%, transparent 100%); }
+        .risk-basso { border-left: 4px solid #22c55e; background: linear-gradient(90deg, rgba(34,197,94,0.1) 0%, transparent 100%); }
+        
+        .tab-active { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; }
     </style>
 </head>
-<body>
-
-<!-- HEADER -->
-<header class="header">
-    <div class="header-content">
-        <h1>🏗️ Sediver ITSM Implementation</h1>
-        <p>Freshservice • ITIL 4 • CRMpartners Project Management</p>
-    </div>
-    <div class="header-stats">
-        <div class="header-stat">
-            <div class="value">53</div>
-            <div class="label">Attività Totali</div>
-        </div>
-        <div class="header-stat">
-            <div class="value">28</div>
-            <div class="label">Critical Path</div>
-        </div>
-        <div class="header-stat danger">
-            <div class="value">98</div>
-            <div class="label">Giorni al Go-Live</div>
-        </div>
-        <div class="header-stat">
-            <div class="value">07 Mag</div>
-            <div class="label">Go-Live Date</div>
-        </div>
-    </div>
-</header>
-
-<!-- MAIN CONTENT -->
-<main class="main">
-
-    <!-- KPI ROW -->
-    <section class="section">
-        <div class="grid-4">
-            <div class="kpi-card">
-                <div class="kpi-icon blue">📋</div>
-                <div class="kpi-content">
-                    <div class="value">53</div>
-                    <div class="label">Attività Pianificate</div>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon green">✅</div>
-                <div class="kpi-content">
-                    <div class="value">0</div>
-                    <div class="label">Completate</div>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon orange">🔄</div>
-                <div class="kpi-content">
-                    <div class="value">0</div>
-                    <div class="label">In Corso</div>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon red">⚡</div>
-                <div class="kpi-content">
-                    <div class="value">28</div>
-                    <div class="label">Critical Path</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- PHASE PROGRESS & MILESTONES -->
-    <section class="section">
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-header">
-                    <h3>📈 Avanzamento Fasi ITSM</h3>
-                </div>
-                <div class="card-body">
-                    <div class="phase-list">
-                        <div class="phase-item">
-                            <span class="phase-name">Assessment</span>
-                            <div class="phase-bar">
-                                <div class="phase-fill" style="width: 0%; background: #3b82f6;">0%</div>
-                            </div>
-                            <span class="phase-dates">29 Gen → 17 Feb</span>
-                        </div>
-                        <div class="phase-item">
-                            <span class="phase-name">Design</span>
-                            <div class="phase-bar">
-                                <div class="phase-fill" style="width: 0%; background: #10b981;">0%</div>
-                            </div>
-                            <span class="phase-dates">17 Feb → 03 Mar</span>
-                        </div>
-                        <div class="phase-item">
-                            <span class="phase-name">Build</span>
-                            <div class="phase-bar">
-                                <div class="phase-fill" style="width: 0%; background: #f59e0b;">0%</div>
-                            </div>
-                            <span class="phase-dates">03 Mar → 16 Apr</span>
-                        </div>
-                        <div class="phase-item">
-                            <span class="phase-name">UAT</span>
-                            <div class="phase-bar">
-                                <div class="phase-fill" style="width: 0%; background: #8b5cf6;">0%</div>
-                            </div>
-                            <span class="phase-dates">16 Apr → 07 Mag</span>
-                        </div>
-                        <div class="phase-item">
-                            <span class="phase-name">Go-Live</span>
-                            <div class="phase-bar">
-                                <div class="phase-fill" style="width: 0%; background: #ef4444;">0%</div>
-                            </div>
-                            <span class="phase-dates">07 Maggio 2026</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3>🏁 Milestones Progetto</h3>
-                </div>
-                <div class="card-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Milestone</th>
-                                <th>Data</th>
-                                <th>Fase</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Assessment Complete</strong></td>
-                                <td>17 Feb 2026</td>
-                                <td><span class="badge badge-blue">Assessment</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Design Freeze</strong></td>
-                                <td>03 Mar 2026</td>
-                                <td><span class="badge badge-green">Design</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Core Build Complete</strong></td>
-                                <td>31 Mar 2026</td>
-                                <td><span class="badge badge-orange">Build</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>UAT Start</strong></td>
-                                <td>16 Apr 2026</td>
-                                <td><span class="badge badge-purple">UAT</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>🚀 Go-Live</strong></td>
-                                <td>07 Mag 2026</td>
-                                <td><span class="badge badge-red">Go-Live</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- GANTT CHART -->
-    <section class="section">
-        <div class="card">
-            <div class="card-header">
-                <h3>📅 GANTT Chart - Timeline Progetto</h3>
-                <div class="gantt-legend">
-                    <div class="legend-item"><div class="legend-color" style="background: #3b82f6;"></div> Assessment</div>
-                    <div class="legend-item"><div class="legend-color" style="background: #10b981;"></div> Design</div>
-                    <div class="legend-item"><div class="legend-color" style="background: #f59e0b;"></div> Build</div>
-                    <div class="legend-item"><div class="legend-color" style="background: #8b5cf6;"></div> UAT</div>
-                    <div class="legend-item"><div class="legend-color" style="background: #ef4444; border: 2px solid #b91c1c;"></div> Critical Path</div>
-                    <div class="legend-item"><div class="legend-color" style="background: #7c3aed; transform: rotate(45deg); width: 12px; height: 12px;"></div> Milestone</div>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="gantt-container">
-                    <div id="gantt-chart"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ACTIVITY MATRIX -->
-    <section class="section">
-        <div class="card">
-            <div class="card-header">
-                <h3>📋 Activity Matrix</h3>
-                <span style="font-size: 0.8rem; color: var(--gray-500);">⚡ Critical Path • 🏁 Milestone</span>
-            </div>
-            <div class="card-body">
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Task</th>
-                                <th>Fase ITSM</th>
-                                <th>Owner</th>
-                                <th>Priorità</th>
-                                <th>Start</th>
-                                <th>End</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="activity-tbody">
-                            <!-- Populated by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CRITICAL PATH & RISKS -->
-    <section class="section">
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-header">
-                    <h3>⚡ Critical Path Monitor</h3>
-                    <span class="badge badge-red">28 attività • 98 giorni</span>
-                </div>
-                <div class="card-body">
-                    <div class="critical-list" id="critical-list">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h3>⚠️ Risk Register</h3>
-                    <span class="badge badge-orange">10 rischi attivi</span>
-                </div>
-                <div class="card-body">
-                    <div class="risk-grid">
-                        <div class="risk-matrix">
-                            <div class="cell y-axis">Alta</div>
-                            <div class="cell medium"></div>
-                            <div class="cell high"><div class="risk-dot">5</div></div>
-                            <div class="cell high"><div class="risk-dot">1</div></div>
-                            
-                            <div class="cell y-axis">Media</div>
-                            <div class="cell low"></div>
-                            <div class="cell medium"><div class="risk-dot">3</div></div>
-                            <div class="cell high"><div class="risk-dot">2</div></div>
-                            
-                            <div class="cell y-axis">Bassa</div>
-                            <div class="cell low"><div class="risk-dot">9</div></div>
-                            <div class="cell low"><div class="risk-dot">6</div></div>
-                            <div class="cell medium"><div class="risk-dot">10</div></div>
-                            
-                            <div class="cell"></div>
-                            <div class="cell x-axis">Basso</div>
-                            <div class="cell x-axis">Medio</div>
-                            <div class="cell x-axis">Alto</div>
-                        </div>
-                        <div class="risk-list">
-                            <div class="risk-item high">
-                                <div>
-                                    <div class="name">Ritardo consegna Catalogo</div>
-                                    <div class="category">Client Dependency</div>
-                                </div>
-                                <span class="risk-score high">9</span>
-                            </div>
-                            <div class="risk-item high">
-                                <div>
-                                    <div class="name">Complessità SSO Integration</div>
-                                    <div class="category">Technical</div>
-                                </div>
-                                <span class="risk-score high">6</span>
-                            </div>
-                            <div class="risk-item high">
-                                <div>
-                                    <div class="name">Workflow approvazione complessi</div>
-                                    <div class="category">Scope</div>
-                                </div>
-                                <span class="risk-score high">6</span>
-                            </div>
-                            <div class="risk-item high">
-                                <div>
-                                    <div class="name">Scarsa adozione utenti</div>
-                                    <div class="category">Change Management</div>
-                                </div>
-                                <span class="risk-score high">6</span>
-                            </div>
-                            <div class="risk-item medium">
-                                <div>
-                                    <div class="name">Definizione SLA incompleta</div>
-                                    <div class="category">Requirements</div>
-                                </div>
-                                <span class="risk-score medium">4</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-</main>
-
-<!-- FOOTER -->
-<footer class="footer">
-    <p>Sediver ITSM Implementation Dashboard • ITIL 4 Compliant • CRMpartners © 2026</p>
-</footer>
-
-<script>
-// Project Data
-const projectData = {
-    phases: [
-        { id: 'assessment', name: 'Assessment', color: '#3b82f6' },
-        { id: 'design', name: 'Design', color: '#10b981' },
-        { id: 'build', name: 'Build', color: '#f59e0b' },
-        { id: 'uat', name: 'UAT', color: '#8b5cf6' },
-        { id: 'golive', name: 'Go-Live', color: '#ef4444' }
-    ],
-    tasks: [
-        { id: 'T001', name: 'AS IS / TO BE', phase: 'assessment', owner: 'CRMP', priority: 'Alta', start: '2026-01-29', end: '2026-02-09', critical: true, milestone: true },
-        { id: 'T002', name: 'Affinamento requisiti TO BE', phase: 'assessment', owner: 'Client', priority: 'Alta', start: '2026-02-10', end: '2026-02-17', critical: true, milestone: false },
-        { id: 'T003', name: 'TO BE workflows e approvazioni', phase: 'assessment', owner: 'Client', priority: 'Alta', start: '2026-02-10', end: '2026-02-16', critical: true, milestone: false },
-        { id: 'T004', name: 'TO BE SLA', phase: 'assessment', owner: 'CRMP', priority: 'Alta', start: '2026-02-10', end: '2026-02-17', critical: true, milestone: false },
-        { id: 'T005', name: 'TO BE Automazioni', phase: 'assessment', owner: 'Client', priority: 'Media', start: '2026-02-10', end: '2026-02-17', critical: false, milestone: true },
-        { id: 'T011', name: 'Creazione Gruppi Operatori', phase: 'design', owner: 'CRMP', priority: 'Alta', start: '2026-02-17', end: '2026-03-03', critical: true, milestone: false },
-        { id: 'T012', name: 'Creazione Gruppi Richiedenti', phase: 'design', owner: 'CRMP', priority: 'Alta', start: '2026-02-17', end: '2026-03-03', critical: true, milestone: false },
-        { id: 'T018', name: 'Creazione Categoria Ticket', phase: 'design', owner: 'CRMP', priority: 'Alta', start: '2026-02-17', end: '2026-03-03', critical: true, milestone: false },
-        { id: 'T019', name: 'Creazione Service Item', phase: 'design', owner: 'CRMP', priority: 'Alta', start: '2026-02-17', end: '2026-03-03', critical: true, milestone: false },
-        { id: 'T020', name: 'Creazione Campi custom form INC', phase: 'design', owner: 'CRMP', priority: 'Alta', start: '2026-02-17', end: '2026-03-03', critical: true, milestone: false },
-        { id: 'T030', name: 'Creazione SLA di Servizio', phase: 'design', owner: 'CRMP', priority: 'Alta', start: '2026-02-17', end: '2026-02-24', critical: true, milestone: false },
-        { id: 'T008', name: 'Creazione Operatori', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-03', end: '2026-03-17', critical: true, milestone: true },
-        { id: 'T009', name: 'Assegnazione Ruoli e Permessi', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-03', end: '2026-03-17', critical: true, milestone: false },
-        { id: 'T014', name: 'SSO Setup', phase: 'build', owner: 'Client', priority: 'Alta', start: '2026-03-03', end: '2026-03-17', critical: true, milestone: false },
-        { id: 'T015', name: 'Call SSO - amministratore tenant', phase: 'build', owner: 'Client & CRMP', priority: 'Alta', start: '2026-03-03', end: '2026-03-17', critical: true, milestone: false },
-        { id: 'T016', name: 'User Provisioning (da AD)', phase: 'build', owner: 'Client & CRMP', priority: 'Alta', start: '2026-03-03', end: '2026-03-17', critical: true, milestone: false },
-        { id: 'T021', name: 'Workflow Assegnazione INC', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-03', end: '2026-03-17', critical: true, milestone: false },
-        { id: 'T022', name: 'Workflow escalation INC', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-03', end: '2026-03-17', critical: true, milestone: false },
-        { id: 'T026', name: 'Workflow Approvativi SR', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-17', end: '2026-03-31', critical: true, milestone: false },
-        { id: 'T027', name: 'Workflow Orchestration', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-17', end: '2026-03-31', critical: true, milestone: false },
-        { id: 'T028', name: 'Workflow Assegnazione SR', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-17', end: '2026-03-31', critical: true, milestone: false },
-        { id: 'T033', name: 'Regole di chiusura ticket', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-03', end: '2026-03-17', critical: true, milestone: true },
-        { id: 'T049', name: 'Formazione admin', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-17', end: '2026-03-31', critical: true, milestone: false },
-        { id: 'T050', name: 'Formazione operatori', phase: 'build', owner: 'CRMP', priority: 'Alta', start: '2026-03-17', end: '2026-03-31', critical: true, milestone: true },
-        { id: 'T051', name: 'Feedback e debug Rilascio 1', phase: 'build', owner: 'Client & CRMP', priority: 'Alta', start: '2026-03-17', end: '2026-04-07', critical: true, milestone: false },
-        { id: 'T039', name: 'Mappatura fulfill asset SR', phase: 'uat', owner: 'CRMP', priority: 'Alta', start: '2026-04-16', end: '2026-04-30', critical: true, milestone: true },
-        { id: 'T043', name: 'Struttura ticket parent child', phase: 'uat', owner: 'CRMP', priority: 'Alta', start: '2026-04-22', end: '2026-05-06', critical: true, milestone: false },
-        { id: 'T052', name: 'Feedback e debug Rilascio 2', phase: 'uat', owner: 'Client & CRMP', priority: 'Alta', start: '2026-04-16', end: '2026-05-07', critical: true, milestone: false },
-        { id: 'T053', name: 'Feedback e debug Rilascio 3', phase: 'uat', owner: 'Client & CRMP', priority: 'Alta', start: '2026-04-22', end: '2026-05-06', critical: true, milestone: false },
-        { id: 'T006', name: 'Assets Requirements', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-03-24', end: '2026-04-02', critical: false, milestone: true },
-        { id: 'T007', name: 'Analisi onboarding/offboarding', phase: 'build', owner: 'Client', priority: 'Bassa', start: '2026-04-02', end: '2026-04-13', critical: false, milestone: false },
-        { id: 'T010', name: 'Personalizzazione Anagrafica', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-03-03', end: '2026-03-17', critical: false, milestone: false },
-        { id: 'T013', name: 'Creazione Reparti', phase: 'design', owner: 'CRMP', priority: 'Media', start: '2026-02-17', end: '2026-03-03', critical: false, milestone: false },
-        { id: 'T017', name: 'CNAME Configuration', phase: 'assessment', owner: 'Client & CRMP', priority: 'Media', start: '2026-02-10', end: '2026-02-24', critical: false, milestone: false },
-        { id: 'T023', name: 'Regole visibilità SR', phase: 'design', owner: 'CRMP', priority: 'Media', start: '2026-02-17', end: '2026-03-03', critical: false, milestone: false },
-        { id: 'T024', name: 'Regole di layout SR', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-03-03', end: '2026-03-17', critical: false, milestone: false },
-        { id: 'T025', name: 'Creazione tabelle dati', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-03-03', end: '2026-03-17', critical: false, milestone: false },
-        { id: 'T029', name: 'Creazione Orari di Ufficio', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-03-03', end: '2026-03-17', critical: false, milestone: false },
-        { id: 'T031', name: 'Creazione regole di Layout', phase: 'design', owner: 'CRMP', priority: 'Media', start: '2026-02-17', end: '2026-03-03', critical: false, milestone: false },
-        { id: 'T032', name: 'Notifiche automatiche', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-03-03', end: '2026-03-17', critical: false, milestone: false },
-        { id: 'T034', name: 'Configurazione Survey', phase: 'build', owner: 'CRMP', priority: 'Bassa', start: '2026-03-17', end: '2026-03-31', critical: false, milestone: false },
-        { id: 'T035', name: 'Call su Assets ed analisi', phase: 'build', owner: 'Client & CRMP', priority: 'Media', start: '2026-04-02', end: '2026-04-16', critical: false, milestone: false },
-        { id: 'T036', name: 'Discovery probe SCCM', phase: 'build', owner: 'Client & CRMP', priority: 'Media', start: '2026-04-02', end: '2026-04-16', critical: false, milestone: false },
-        { id: 'T037', name: 'Campi custom assets', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-04-02', end: '2026-04-16', critical: false, milestone: false },
-        { id: 'T038', name: 'Workflow Asset rottura stock', phase: 'uat', owner: 'CRMP', priority: 'Media', start: '2026-04-16', end: '2026-04-30', critical: false, milestone: false },
-        { id: 'T040', name: 'Analisi processo Onboarding', phase: 'build', owner: 'Client & CRMP', priority: 'Media', start: '2026-04-02', end: '2026-04-13', critical: false, milestone: false },
-        { id: 'T041', name: 'Creazione form HR', phase: 'uat', owner: 'Client', priority: 'Media', start: '2026-04-13', end: '2026-04-22', critical: false, milestone: false },
-        { id: 'T042', name: 'Creazione Kit Onboarding', phase: 'uat', owner: 'CRMP', priority: 'Media', start: '2026-04-13', end: '2026-04-22', critical: false, milestone: false },
-        { id: 'T044', name: 'Notifiche a stakeholders', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-04-02', end: '2026-04-09', critical: false, milestone: false },
-        { id: 'T045', name: 'Creazione form offboarding', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-04-02', end: '2026-04-16', critical: false, milestone: false },
-        { id: 'T047', name: 'Analisi report richiesti', phase: 'build', owner: 'Client & CRMP', priority: 'Media', start: '2026-03-17', end: '2026-03-31', critical: false, milestone: false },
-        { id: 'T048', name: 'Custom reports', phase: 'build', owner: 'CRMP', priority: 'Media', start: '2026-03-17', end: '2026-03-31', critical: false, milestone: false }
-    ]
-};
-
-// Utility functions
-const formatDate = (dateStr) => {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
-};
-
-const getPhaseColor = (phase) => {
-    const colors = { assessment: '#3b82f6', design: '#10b981', build: '#f59e0b', uat: '#8b5cf6', golive: '#ef4444' };
-    return colors[phase] || '#64748b';
-};
-
-const getPhaseBadge = (phase) => {
-    const badges = { assessment: 'badge-blue', design: 'badge-green', build: 'badge-orange', uat: 'badge-purple', golive: 'badge-red' };
-    return badges[phase] || 'badge-gray';
-};
-
-const getOwnerBadge = (owner) => {
-    if (owner === 'CRMP') return 'badge-blue';
-    if (owner === 'Client') return 'badge-green';
-    return 'badge-orange';
-};
-
-// Render Activity Matrix
-function renderActivityMatrix() {
-    const tbody = document.getElementById('activity-tbody');
-    tbody.innerHTML = projectData.tasks.map(task => `
-        <tr class="${task.critical ? 'critical' : ''}">
-            <td>
-                <div class="task-name">
-                    ${task.critical ? '<span class="critical-icon">⚡</span>' : ''}
-                    <span>${task.name}</span>
-                    ${task.milestone ? '<span class="milestone-icon">🏁</span>' : ''}
-                </div>
-            </td>
-            <td><span class="badge ${getPhaseBadge(task.phase)}">${task.phase.charAt(0).toUpperCase() + task.phase.slice(1)}</span></td>
-            <td><span class="badge ${getOwnerBadge(task.owner)}">${task.owner}</span></td>
-            <td>
-                <span class="priority-dot priority-${task.priority.toLowerCase()}"></span>
-                ${task.priority}
-            </td>
-            <td>${formatDate(task.start)}</td>
-            <td>${formatDate(task.end)}</td>
-            <td><span class="status-badge status-not-started">Non Iniziato</span></td>
-        </tr>
-    `).join('');
-}
-
-// Render Critical Path
-function renderCriticalPath() {
-    const container = document.getElementById('critical-list');
-    const criticalTasks = projectData.tasks.filter(t => t.critical).slice(0, 10);
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+    <div id="root"></div>
     
-    container.innerHTML = criticalTasks.map((task, idx) => `
-        <div class="critical-item">
-            <div class="number">${idx + 1}</div>
-            <div class="info">
-                <div class="name">${task.name}</div>
-                <div class="dates">${formatDate(task.start)} → ${formatDate(task.end)}</div>
-            </div>
-            <div class="impact">
-                <div class="label">Impatta</div>
-                <div class="value">${task.phase === 'uat' ? 'Go-Live' : task.phase.charAt(0).toUpperCase() + task.phase.slice(1)}</div>
-            </div>
-        </div>
-    `).join('');
-}
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-// Render GANTT Chart
-function renderGantt() {
-    const container = document.getElementById('gantt-chart');
-    const tasks = projectData.tasks;
-    
-    const margin = { top: 40, right: 30, bottom: 30, left: 200 };
-    const width = Math.max(container.clientWidth, 900) - margin.left - margin.right;
-    const barHeight = 22;
-    const barPadding = 4;
-    const height = (barHeight + barPadding) * tasks.length;
+        // ============================================
+        // DATA
+        // ============================================
+        
+        const PROJECT_DATA = {
+            info: {
+                name: "SEDIVER Corporate - Freshservice ITSM",
+                client: "SEDIVER CORPORATE SRL",
+                start: "2026-01-29",
+                end: "2026-05-07",
+                budget: "€22.000 consulting + €75.168 licensing",
+                releases: [
+                    { id: "R1", name: "Release 1", date: "2026-03-31", scope: "Incident, Service Catalog, Change base" },
+                    { id: "R2", name: "Release 2", date: "2026-04-30", scope: "Assets, Service Request completo" },
+                    { id: "R3", name: "Release 3", date: "2026-05-07", scope: "Onboarding/Offboarding, Go-Live" }
+                ]
+            },
+            
+            workstreams: [
+                { id: "raccolta-requisiti", name: "Raccolta Requisiti", color: "#6366f1" },
+                { id: "gestione-utenti", name: "Gestione Utenti", color: "#8b5cf6" },
+                { id: "account", name: "Account & SSO", color: "#a855f7" },
+                { id: "service-catalog", name: "Service Catalog", color: "#3b82f6" },
+                { id: "change-management", name: "Change Management", color: "#06b6d4" },
+                { id: "assets", name: "Assets", color: "#10b981" },
+                { id: "onboarding", name: "Onboarding/Offboarding", color: "#f59e0b" },
+                { id: "freddy-kb", name: "Freddy AI & KB", color: "#ec4899" },
+                { id: "reports", name: "Reports", color: "#14b8a6" },
+                { id: "training", name: "Training", color: "#f97316" },
+                { id: "modifiche", name: "Modifiche & Debug", color: "#64748b" }
+            ],
+            
+            activities: [
+                { id: "ACT-001", title: "AS IS / TO BE", workstream: "raccolta-requisiti", owner: "CRMP", priority: "Alta", status: "Non Iniziato", start: "2026-01-29", due: "2026-02-09", milestone: true, dependencies: "Catalogo" },
+                { id: "ACT-002", title: "Affinamento requisiti TO BE", workstream: "raccolta-requisiti", owner: "Client", priority: "Alta", status: "Non Iniziato", start: "2026-02-10", due: "2026-02-17", milestone: false, dependencies: null },
+                { id: "ACT-003", title: "TO BE workflows e processi di approvazione", workstream: "raccolta-requisiti", owner: "Client", priority: "Alta", status: "Non Iniziato", start: "2026-02-10", due: "2026-02-16", milestone: false, dependencies: null },
+                { id: "ACT-004", title: "TO BE SLA", workstream: "raccolta-requisiti", owner: "Client", priority: "Alta", status: "Non Iniziato", start: "2026-02-10", due: "2026-02-17", milestone: false, dependencies: null },
+                { id: "ACT-005", title: "TO BE Change Management", workstream: "raccolta-requisiti", owner: "Client", priority: "Alta", status: "Non Iniziato", start: "2026-02-09", due: "2026-02-16", milestone: false, dependencies: null },
+                { id: "ACT-006", title: "TO BE Automazioni", workstream: "raccolta-requisiti", owner: "Client", priority: "Alta", status: "Non Iniziato", start: "2026-02-10", due: "2026-02-17", milestone: true, dependencies: null },
+                { id: "ACT-007", title: "Assets Requirements", workstream: "raccolta-requisiti", owner: "Client", priority: "Media", status: "Non Iniziato", start: "2026-03-24", due: "2026-04-02", milestone: true, dependencies: null },
+                { id: "ACT-008", title: "Analisi processo onboarding/offboarding", workstream: "raccolta-requisiti", owner: "Client", priority: "Bassa", status: "Non Iniziato", start: "2026-04-02", due: "2026-04-13", milestone: false, dependencies: null },
+                
+                { id: "ACT-009", title: "Creazione Operatori", workstream: "gestione-utenti", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: true, dependencies: null },
+                { id: "ACT-010", title: "Assegnazione Ruoli e Permessi", workstream: "gestione-utenti", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: null },
+                { id: "ACT-011", title: "Personalizzazione Anagrafica", workstream: "gestione-utenti", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: null },
+                { id: "ACT-012", title: "Creazione Gruppi Operatori", workstream: "gestione-utenti", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: "Affinamento requisiti TO BE" },
+                { id: "ACT-013", title: "Creazione Gruppi Richiedenti", workstream: "gestione-utenti", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: "Affinamento requisiti TO BE" },
+                { id: "ACT-014", title: "Creazione Reparti", workstream: "gestione-utenti", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: null },
+                
+                { id: "ACT-015", title: "SSO Setup", workstream: "account", owner: "Client", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: null },
+                { id: "ACT-016", title: "Call SSO - amministratore tenant", workstream: "account", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: null },
+                { id: "ACT-017", title: "User Provisioning (da AD)", workstream: "account", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: null },
+                { id: "ACT-018", title: "CNAME Configuration", workstream: "account", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-10", due: "2026-02-24", milestone: false, dependencies: null },
+                
+                { id: "ACT-019", title: "Creazione Categoria Ticket", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: "Affinamento requisiti TO BE" },
+                { id: "ACT-020", title: "Creazione Service Items", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: "Affinamento requisiti TO BE" },
+                { id: "ACT-021", title: "Creazione Campi custom form INC", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: "Affinamento requisiti TO BE" },
+                { id: "ACT-022", title: "Creazione Workflow Assegnazione INC", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: "TO BE workflows, Categoria Ticket" },
+                { id: "ACT-023", title: "Creazione Workflow escalation INC", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: "TO BE workflows, Categoria Ticket" },
+                { id: "ACT-024", title: "Layout Rules INC (Visibilità, Obbligo)", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: "TO BE workflows" },
+                { id: "ACT-025", title: "Layout Rules SR (Visibilità, Obbligo)", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: "TO BE workflows" },
+                { id: "ACT-026", title: "Creazione tabelle dati", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: null },
+                { id: "ACT-027", title: "Creazione Workflow Approvativi SR", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: false, dependencies: "TO BE workflows" },
+                { id: "ACT-028", title: "Creazione Workflow Orchestration", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: false, dependencies: "TO BE workflows" },
+                { id: "ACT-029", title: "Creazione Workflow Assegnazione SR", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: false, dependencies: "TO BE workflows" },
+                { id: "ACT-030", title: "Creazione Orari di Ufficio", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: "AS IS / TO BE" },
+                { id: "ACT-031", title: "Creazione SLA di Servizio", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-02-24", milestone: false, dependencies: "TO BE SLA" },
+                { id: "ACT-032", title: "Notifiche automatiche Richiedenti/Agenti", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: "AS IS / TO BE" },
+                { id: "ACT-033", title: "Regole di chiusura ticket", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: true, release: "R1", dependencies: "Workflow Orchestration" },
+                { id: "ACT-034", title: "Configurazione Survey", workstream: "service-catalog", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: false, dependencies: "AS IS / TO BE" },
+                
+                { id: "ACT-035", title: "Creazione Request for Change", workstream: "change-management", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: "TO BE Change Management" },
+                { id: "ACT-036", title: "Campi custom form Change", workstream: "change-management", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: "TO BE Change Management" },
+                { id: "ACT-037", title: "Layout Rules Change", workstream: "change-management", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: false, dependencies: "Campi custom form Change" },
+                { id: "ACT-038", title: "Change Lifecycle", workstream: "change-management", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: false, dependencies: "TO BE workflows" },
+                { id: "ACT-039", title: "Workflow escalation Change", workstream: "change-management", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: "Change Lifecycle" },
+                { id: "ACT-040", title: "Notifiche Change", workstream: "change-management", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-03", due: "2026-03-17", milestone: false, dependencies: "Change Lifecycle" },
+                { id: "ACT-041", title: "Workflow Approvativo Change", workstream: "change-management", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: "Change Lifecycle" },
+                { id: "ACT-042", title: "CAB templates & CAB Meeting", workstream: "change-management", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-02-17", due: "2026-03-03", milestone: false, dependencies: null },
+                
+                { id: "ACT-043", title: "Call Assets ed analisi", workstream: "assets", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-02", due: "2026-04-16", milestone: false, dependencies: "Assets Requirements" },
+                { id: "ACT-044", title: "Discovery probe SCCM", workstream: "assets", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-02", due: "2026-04-16", milestone: false, dependencies: null },
+                { id: "ACT-045", title: "Campi custom assets", workstream: "assets", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-02", due: "2026-04-16", milestone: false, dependencies: null },
+                { id: "ACT-046", title: "Workflow Asset rottura stock", workstream: "assets", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-16", due: "2026-04-30", milestone: false, dependencies: "Campi custom assets" },
+                { id: "ACT-047", title: "Mappatura fulfill asset SR", workstream: "assets", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-16", due: "2026-04-30", milestone: true, release: "R2", dependencies: "Campi custom assets" },
+                
+                { id: "ACT-048", title: "Creazione form HR", workstream: "onboarding", owner: "Client", priority: "Media", status: "Non Iniziato", start: "2026-04-13", due: "2026-04-22", milestone: false, dependencies: "Assets Requirements" },
+                { id: "ACT-049", title: "Creazione Kit Onboarding", workstream: "onboarding", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-13", due: "2026-04-22", milestone: false, dependencies: null },
+                { id: "ACT-050", title: "Struttura ticket parent-child", workstream: "onboarding", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-22", due: "2026-05-06", milestone: false, dependencies: null },
+                { id: "ACT-051", title: "Notifiche a stakeholders", workstream: "onboarding", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-02", due: "2026-04-09", milestone: false, dependencies: null },
+                { id: "ACT-052", title: "Creazione form offboarding", workstream: "onboarding", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-02", due: "2026-04-16", milestone: true, release: "R3", dependencies: "Regole chiusura ticket" },
+                
+                { id: "ACT-053", title: "Freddy AI Installazione", workstream: "freddy-kb", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-27", due: "2026-03-30", milestone: false, dependencies: null },
+                { id: "ACT-054", title: "Knowledge Base - Struttura Freddy", workstream: "freddy-kb", owner: "Client", priority: "Media", status: "Non Iniziato", start: "2026-03-27", due: "2026-04-10", milestone: true, release: "R4", dependencies: null },
+                
+                { id: "ACT-055", title: "Analisi report richiesti", workstream: "reports", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: false, dependencies: "Affinamento requisiti TO BE" },
+                { id: "ACT-056", title: "Custom reports", workstream: "reports", owner: "CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: true, release: "R5", dependencies: null },
+                
+                { id: "ACT-057", title: "Formazione admin", workstream: "training", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: false, dependencies: null },
+                { id: "ACT-058", title: "Formazione operatori", workstream: "training", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-03-31", milestone: true, dependencies: "Release 1" },
+                
+                { id: "ACT-059", title: "Feedback e debug Rilascio 1", workstream: "modifiche", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-03-17", due: "2026-04-07", milestone: false, dependencies: "Release 1" },
+                { id: "ACT-060", title: "Feedback e debug Rilascio 2", workstream: "modifiche", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-16", due: "2026-05-07", milestone: false, dependencies: "Release 2" },
+                { id: "ACT-061", title: "Feedback e debug Rilascio 3", workstream: "modifiche", owner: "Client & CRMP", priority: "Media", status: "Non Iniziato", start: "2026-04-22", due: "2026-05-06", milestone: false, dependencies: "Release 3" }
+            ],
+            
+            risks: [
+                { id: "RSK-001", title: "Ritardo validazione requisiti", impact: "Alto", mitigation: "Checkpoint settimanali, escalation", status: "Aperto", owner: "PM" },
+                { id: "RSK-002", title: "Indisponibilità risorse cliente", impact: "Alto", mitigation: "Calendario condiviso, backup owner", status: "Aperto", owner: "PM" },
+                { id: "RSK-003", title: "Requisiti da validare con molteplici stakeholders", impact: "Alto", mitigation: "Governance/Ownership progetto lato SEDIVER pre-stabilita e chiara", status: "Aperto", owner: "Client" },
+                { id: "RSK-004", title: "Complessità richieste", impact: "Medio", mitigation: "Assessment durante analisi, accordo su MVP, freeze modifiche", status: "Aperto", owner: "CRMP" },
+                { id: "RSK-005", title: "Scope creep", impact: "Medio", mitigation: "Controllo progetto rigoroso", status: "Aperto", owner: "PM" },
+                { id: "RSK-006", title: "Qualità dati per import", impact: "Medio", mitigation: "No Data Quality inclusa, validazione preventiva cliente", status: "Aperto", owner: "Client" },
+                { id: "RSK-007", title: "Necessità multilingua", impact: "Basso", mitigation: "Non esistono possibilità di verifica traduzione", status: "Aperto", owner: "Client" }
+            ]
+        };
 
-    const svg = d3.select(container)
-        .append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom);
+        // ============================================
+        // MAIN APP
+        // ============================================
+        
+        function App() {
+            const [activeView, setActiveView] = useState('dashboard');
+            const [darkMode, setDarkMode] = useState(false);
+            const [selectedItem, setSelectedItem] = useState(null);
+            const [searchQuery, setSearchQuery] = useState('');
+            const [filters, setFilters] = useState({ workstream: 'all', owner: 'all', status: 'all' });
 
-    const chart = svg.append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`);
+            useEffect(() => {
+                document.documentElement.classList.toggle('dark', darkMode);
+            }, [darkMode]);
 
-    // Time scale
-    const allDates = tasks.flatMap(t => [new Date(t.start), new Date(t.end)]);
-    const minDate = d3.timeDay.offset(d3.min(allDates), -5);
-    const maxDate = d3.timeDay.offset(d3.max(allDates), 10);
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <Header 
+                        darkMode={darkMode} 
+                        setDarkMode={setDarkMode}
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                    />
+                    <Navigation activeView={activeView} setActiveView={setActiveView} />
+                    
+                    <main className="flex-1 max-w-[1800px] w-full mx-auto px-4 sm:px-6 py-6">
+                        {activeView === 'dashboard' && <DashboardView setActiveView={setActiveView} setSelectedItem={setSelectedItem} />}
+                        {activeView === 'board' && <BoardView filters={filters} setFilters={setFilters} searchQuery={searchQuery} setSelectedItem={setSelectedItem} />}
+                        {activeView === 'timeline' && <TimelineView setSelectedItem={setSelectedItem} />}
+                        {activeView === 'risks' && <RisksView setSelectedItem={setSelectedItem} />}
+                    </main>
 
-    const xScale = d3.scaleTime().domain([minDate, maxDate]).range([0, width]);
-    const yScale = d3.scaleBand().domain(tasks.map(t => t.id)).range([0, height]).padding(0.15);
+                    {selectedItem && <DetailModal item={selectedItem} onClose={() => setSelectedItem(null)} />}
+                </div>
+            );
+        }
 
-    // X Axis
-    svg.append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top - 5})`)
-        .call(d3.axisTop(xScale).ticks(d3.timeWeek.every(1)).tickFormat(d3.timeFormat('%d %b')))
-        .selectAll('text')
-        .style('font-size', '10px')
-        .style('fill', '#64748b');
+        // ============================================
+        // HEADER
+        // ============================================
 
-    // Grid lines
-    chart.selectAll('line.grid')
-        .data(xScale.ticks(d3.timeWeek.every(1)))
-        .enter()
-        .append('line')
-        .attr('x1', d => xScale(d))
-        .attr('x2', d => xScale(d))
-        .attr('y1', 0)
-        .attr('y2', height)
-        .attr('stroke', '#e2e8f0');
+        function Header({ darkMode, setDarkMode, searchQuery, setSearchQuery }) {
+            return (
+                <header className="sticky top-0 z-50 glass border-b border-slate-200 dark:border-slate-700">
+                    <div className="max-w-[1800px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+                                S
+                            </div>
+                            <div className="hidden sm:block">
+                                <h1 className="font-semibold text-slate-900 dark:text-white">SEDIVER ITSM</h1>
+                                <p className="text-xs text-slate-500">Project Dashboard</p>
+                            </div>
+                        </div>
 
-    // Task labels
-    svg.append('g')
-        .attr('transform', `translate(0, ${margin.top})`)
-        .selectAll('text')
-        .data(tasks)
-        .enter()
-        .append('text')
-        .attr('x', margin.left - 10)
-        .attr('y', d => yScale(d.id) + yScale.bandwidth() / 2)
-        .attr('text-anchor', 'end')
-        .attr('dominant-baseline', 'middle')
-        .attr('font-size', '11px')
-        .attr('fill', d => d.critical ? '#dc2626' : '#334155')
-        .attr('font-weight', d => d.critical ? '600' : '400')
-        .text(d => d.name.length > 28 ? d.name.substring(0, 28) + '...' : d.name);
+                        <div className="flex-1 max-w-md mx-4">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Cerca attività..."
+                                    className="w-full px-4 py-2 pl-10 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
 
-    // Critical background
-    chart.selectAll('rect.critical-bg')
-        .data(tasks.filter(t => t.critical))
-        .enter()
-        .append('rect')
-        .attr('x', 0)
-        .attr('y', d => yScale(d.id) - 2)
-        .attr('width', width)
-        .attr('height', yScale.bandwidth() + 4)
-        .attr('fill', '#fef2f2')
-        .attr('opacity', 0.5);
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={() => setDarkMode(!darkMode)}
+                                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                {darkMode ? '☀️' : '🌙'}
+                            </button>
+                        </div>
+                    </div>
+                </header>
+            );
+        }
 
-    // Task bars
-    chart.selectAll('rect.task')
-        .data(tasks)
-        .enter()
-        .append('rect')
-        .attr('x', d => xScale(new Date(d.start)))
-        .attr('y', d => yScale(d.id))
-        .attr('width', d => Math.max(xScale(new Date(d.end)) - xScale(new Date(d.start)), 5))
-        .attr('height', yScale.bandwidth())
-        .attr('rx', 4)
-        .attr('fill', d => getPhaseColor(d.phase))
-        .attr('stroke', d => d.critical ? '#dc2626' : 'none')
-        .attr('stroke-width', d => d.critical ? 2 : 0);
+        // ============================================
+        // NAVIGATION
+        // ============================================
 
-    // Milestones
-    chart.selectAll('polygon.milestone')
-        .data(tasks.filter(t => t.milestone))
-        .enter()
-        .append('polygon')
-        .attr('points', d => {
-            const x = xScale(new Date(d.end)) + 10;
-            const y = yScale(d.id) + yScale.bandwidth() / 2;
-            return `${x},${y-8} ${x+8},${y} ${x},${y+8} ${x-8},${y}`;
-        })
-        .attr('fill', '#7c3aed')
-        .attr('stroke', '#5b21b6');
+        function Navigation({ activeView, setActiveView }) {
+            const views = [
+                { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                { id: 'board', label: 'Board', icon: '📋' },
+                { id: 'timeline', label: 'Timeline', icon: '📅' },
+                { id: 'risks', label: 'Rischi', icon: '⚠️' }
+            ];
 
-    // Today line
-    const today = new Date();
-    if (today >= minDate && today <= maxDate) {
-        chart.append('line')
-            .attr('x1', xScale(today))
-            .attr('x2', xScale(today))
-            .attr('y1', 0)
-            .attr('y2', height)
-            .attr('stroke', '#ef4444')
-            .attr('stroke-width', 2)
-            .attr('stroke-dasharray', '5,3');
+            return (
+                <nav className="sticky top-16 z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                    <div className="max-w-[1800px] mx-auto px-4 sm:px-6">
+                        <div className="flex space-x-1 py-2 overflow-x-auto">
+                            {views.map(v => (
+                                <button
+                                    key={v.id}
+                                    onClick={() => setActiveView(v.id)}
+                                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap
+                                        ${activeView === v.id ? 'tab-active shadow-md' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                                >
+                                    <span>{v.icon}</span>
+                                    <span>{v.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </nav>
+            );
+        }
 
-        chart.append('text')
-            .attr('x', xScale(today))
-            .attr('y', -8)
-            .attr('text-anchor', 'middle')
-            .attr('fill', '#ef4444')
-            .attr('font-size', '10px')
-            .attr('font-weight', 'bold')
-            .text('OGGI');
-    }
-}
+        // ============================================
+        // DASHBOARD VIEW
+        // ============================================
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    renderActivityMatrix();
-    renderCriticalPath();
-    renderGantt();
-});
-</script>
+        function DashboardView({ setActiveView, setSelectedItem }) {
+            const stats = useMemo(() => {
+                const total = PROJECT_DATA.activities.length;
+                const byStatus = {
+                    'Non Iniziato': PROJECT_DATA.activities.filter(a => a.status === 'Non Iniziato').length,
+                    'In Corso': PROJECT_DATA.activities.filter(a => a.status === 'In Corso').length,
+                    'Completato': PROJECT_DATA.activities.filter(a => a.status === 'Completato').length,
+                    'Bloccato': PROJECT_DATA.activities.filter(a => a.status === 'Bloccato').length
+                };
+                const milestones = PROJECT_DATA.activities.filter(a => a.milestone);
+                const highPriority = PROJECT_DATA.activities.filter(a => a.priority === 'Alta');
+                const openRisks = PROJECT_DATA.risks.filter(r => r.status === 'Aperto');
+                const highRisks = PROJECT_DATA.risks.filter(r => r.impact === 'Alto' && r.status === 'Aperto');
+                const progress = Math.round((byStatus['Completato'] / total) * 100);
+                
+                return { total, byStatus, milestones, highPriority, openRisks, highRisks, progress };
+            }, []);
 
+            const upcomingMilestones = useMemo(() => {
+                return PROJECT_DATA.activities
+                    .filter(a => a.milestone && a.status !== 'Completato')
+                    .sort((a, b) => new Date(a.due) - new Date(b.due))
+                    .slice(0, 5);
+            }, []);
+
+            const criticalActivities = useMemo(() => {
+                return PROJECT_DATA.activities
+                    .filter(a => a.priority === 'Alta' && a.status !== 'Completato')
+                    .sort((a, b) => new Date(a.due) - new Date(b.due))
+                    .slice(0, 5);
+            }, []);
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    {/* Stats Row */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <StatCard title="Totale Attività" value={stats.total} icon="📋" />
+                        <StatCard title="Avanzamento" value={`${stats.progress}%`} icon="📈" color="blue" />
+                        <StatCard title="Non Iniziate" value={stats.byStatus['Non Iniziato']} icon="⏳" color="slate" />
+                        <StatCard title="In Corso" value={stats.byStatus['In Corso']} icon="🔄" color="amber" />
+                        <StatCard title="Completate" value={stats.byStatus['Completato']} icon="✅" color="emerald" />
+                        <StatCard 
+                            title="Rischi Aperti" 
+                            value={`${stats.highRisks.length} critici`} 
+                            subtitle={`${stats.openRisks.length} totali`}
+                            icon="⚠️" 
+                            color="red"
+                            onClick={() => setActiveView('risks')}
+                        />
+                    </div>
+
+                    {/* Releases Timeline */}
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                        <h2 className="text-lg font-semibold mb-4">📦 Rilasci Pianificati</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {PROJECT_DATA.info.releases.map((r, i) => (
+                                <div key={r.id} className="p-4 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 border border-slate-200 dark:border-slate-600">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="font-bold text-blue-600 dark:text-blue-400">{r.name}</span>
+                                        <span className="text-sm text-slate-500">{formatDate(r.date)}</span>
+                                    </div>
+                                    <p className="text-sm text-slate-600 dark:text-slate-300">{r.scope}</p>
+                                    <div className="mt-3 flex items-center space-x-2">
+                                        <div className="flex-1 h-2 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                                            <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" style={{ width: '0%' }}></div>
+                                        </div>
+                                        <span className="text-xs text-slate-500">0%</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Two Column Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Critical Activities */}
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-lg font-semibold">🔥 Attività Priorità Alta</h2>
+                                <span className="text-sm text-slate-500">{stats.highPriority.length} totali</span>
+                            </div>
+                            <div className="space-y-3">
+                                {criticalActivities.map((act, i) => (
+                                    <ActivityRow key={act.id} activity={act} index={i} onClick={() => setSelectedItem({ type: 'activity', data: act })} />
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Upcoming Milestones */}
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-lg font-semibold">⭐ Prossime Milestone</h2>
+                                <span className="text-sm text-slate-500">{stats.milestones.length} totali</span>
+                            </div>
+                            <div className="space-y-3">
+                                {upcomingMilestones.map((act, i) => (
+                                    <MilestoneRow key={act.id} activity={act} index={i} onClick={() => setSelectedItem({ type: 'activity', data: act })} />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Risk Summary */}
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold">⚠️ Rischi Critici</h2>
+                            <button onClick={() => setActiveView('risks')} className="text-sm text-blue-600 hover:underline">
+                                Vedi tutti →
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {stats.highRisks.map((risk, i) => (
+                                <RiskCard key={risk.id} risk={risk} index={i} onClick={() => setSelectedItem({ type: 'risk', data: risk })} />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Workstream Progress */}
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                        <h2 className="text-lg font-semibold mb-4">📊 Avanzamento per Workstream</h2>
+                        <WorkstreamProgress />
+                    </div>
+                </div>
+            );
+        }
+
+        // ============================================
+        // BOARD VIEW
+        // ============================================
+
+        function BoardView({ filters, setFilters, searchQuery, setSelectedItem }) {
+            const statuses = ['Non Iniziato', 'In Corso', 'Completato', 'Bloccato'];
+            
+            const filteredActivities = useMemo(() => {
+                return PROJECT_DATA.activities.filter(a => {
+                    if (filters.workstream !== 'all' && a.workstream !== filters.workstream) return false;
+                    if (filters.owner !== 'all' && a.owner !== filters.owner) return false;
+                    if (searchQuery) {
+                        const q = searchQuery.toLowerCase();
+                        return a.title.toLowerCase().includes(q) || a.id.toLowerCase().includes(q);
+                    }
+                    return true;
+                });
+            }, [filters, searchQuery]);
+
+            const columns = useMemo(() => {
+                const cols = {};
+                statuses.forEach(s => {
+                    cols[s] = filteredActivities.filter(a => a.status === s);
+                });
+                return cols;
+            }, [filteredActivities]);
+
+            const statusColors = {
+                'Non Iniziato': 'bg-slate-400',
+                'In Corso': 'bg-amber-500',
+                'Completato': 'bg-emerald-500',
+                'Bloccato': 'bg-red-500'
+            };
+
+            return (
+                <div className="space-y-4 animate-fade-in">
+                    {/* Filters */}
+                    <div className="flex flex-wrap items-center gap-3 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                        <select
+                            value={filters.workstream}
+                            onChange={(e) => setFilters({ ...filters, workstream: e.target.value })}
+                            className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-sm"
+                        >
+                            <option value="all">Tutti i Workstream</option>
+                            {PROJECT_DATA.workstreams.map(w => (
+                                <option key={w.id} value={w.id}>{w.name}</option>
+                            ))}
+                        </select>
+                        <select
+                            value={filters.owner}
+                            onChange={(e) => setFilters({ ...filters, owner: e.target.value })}
+                            className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-sm"
+                        >
+                            <option value="all">Tutti gli Owner</option>
+                            <option value="CRMP">CRMP</option>
+                            <option value="Client">Client</option>
+                            <option value="Client & CRMP">Client & CRMP</option>
+                        </select>
+                        <span className="ml-auto text-sm text-slate-500">{filteredActivities.length} attività</span>
+                    </div>
+
+                    {/* Kanban */}
+                    <div className="flex gap-4 overflow-x-auto pb-4">
+                        {statuses.map(status => (
+                            <div key={status} className="flex-shrink-0 w-80">
+                                <div className="bg-slate-100 dark:bg-slate-800/50 rounded-xl p-3">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center space-x-2">
+                                            <div className={`w-3 h-3 rounded-full ${statusColors[status]}`}></div>
+                                            <h3 className="font-medium">{status}</h3>
+                                        </div>
+                                        <span className="text-sm bg-slate-200 dark:bg-slate-700 px-2 py-0.5 rounded-full">
+                                            {columns[status].length}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-2 min-h-[300px]">
+                                        {columns[status].map((act, i) => (
+                                            <KanbanCard key={act.id} activity={act} index={i} onClick={() => setSelectedItem({ type: 'activity', data: act })} />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // ============================================
+        // TIMELINE VIEW
+        // ============================================
+
+        function TimelineView({ setSelectedItem }) {
+            const [filter, setFilter] = useState('all');
+
+            const activities = useMemo(() => {
+                let acts = PROJECT_DATA.activities;
+                if (filter !== 'all') acts = acts.filter(a => a.workstream === filter);
+                return acts.sort((a, b) => new Date(a.start) - new Date(b.start));
+            }, [filter]);
+
+            const { minDate, maxDate, totalDays, months } = useMemo(() => {
+                const dates = activities.flatMap(a => [new Date(a.start), new Date(a.due)]);
+                const min = new Date(Math.min(...dates));
+                const max = new Date(Math.max(...dates));
+                const days = Math.ceil((max - min) / (1000 * 60 * 60 * 24)) + 1;
+                
+                const monthList = [];
+                let curr = new Date(min.getFullYear(), min.getMonth(), 1);
+                while (curr <= max) {
+                    monthList.push(new Date(curr));
+                    curr.setMonth(curr.getMonth() + 1);
+                }
+                return { minDate: min, maxDate: max, totalDays: days, months: monthList };
+            }, [activities]);
+
+            return (
+                <div className="space-y-4 animate-fade-in">
+                    {/* Filter */}
+                    <div className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                        <select
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-sm"
+                        >
+                            <option value="all">Tutti i Workstream</option>
+                            {PROJECT_DATA.workstreams.map(w => (
+                                <option key={w.id} value={w.id}>{w.name}</option>
+                            ))}
+                        </select>
+                        <span className="ml-auto text-sm text-slate-500">{activities.length} attività</span>
+                    </div>
+
+                    {/* Release markers */}
+                    <div className="flex items-center gap-4 px-2 flex-wrap">
+                        {PROJECT_DATA.info.releases.map(r => (
+                            <div key={r.id} className="flex items-center space-x-2">
+                                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                <span className="text-sm font-medium">{r.name}</span>
+                                <span className="text-sm text-slate-500">{formatDate(r.date)}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Gantt */}
+                    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <div className="min-w-[1000px]">
+                                {/* Header */}
+                                <div className="flex border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 sticky top-0">
+                                    <div className="w-64 flex-shrink-0 px-4 py-3 text-xs font-medium text-slate-500 uppercase">
+                                        Attività
+                                    </div>
+                                    <div className="flex-grow flex">
+                                        {months.map((m, i) => {
+                                            const monthEnd = new Date(m.getFullYear(), m.getMonth() + 1, 0);
+                                            const effStart = new Date(Math.max(m, minDate));
+                                            const effEnd = new Date(Math.min(monthEnd, maxDate));
+                                            const daysInRange = Math.ceil((effEnd - effStart) / (1000 * 60 * 60 * 24)) + 1;
+                                            const width = (daysInRange / totalDays) * 100;
+                                            return (
+                                                <div key={i} style={{ width: `${width}%` }} className="text-center text-xs font-medium text-slate-500 py-3 border-r border-slate-200 dark:border-slate-700">
+                                                    {m.toLocaleDateString('it-IT', { month: 'short', year: '2-digit' })}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Rows */}
+                                <div className="max-h-[600px] overflow-y-auto">
+                                    {activities.map((a, idx) => {
+                                        const startOffset = Math.ceil((new Date(a.start) - minDate) / (1000 * 60 * 60 * 24));
+                                        const duration = Math.ceil((new Date(a.due) - new Date(a.start)) / (1000 * 60 * 60 * 24)) + 1;
+                                        const left = (startOffset / totalDays) * 100;
+                                        const width = Math.max((duration / totalDays) * 100, 0.5);
+                                        
+                                        const ws = PROJECT_DATA.workstreams.find(w => w.id === a.workstream);
+                                        let barColor = ws?.color || '#94a3b8';
+                                        if (a.status === 'Completato') barColor = '#10b981';
+                                        if (a.status === 'Bloccato') barColor = '#ef4444';
+
+                                        return (
+                                            <div 
+                                                key={a.id}
+                                                className={`flex items-center border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 cursor-pointer ${a.priority === 'Alta' ? 'bg-red-50/30 dark:bg-red-900/10' : ''}`}
+                                                onClick={() => setSelectedItem({ type: 'activity', data: a })}
+                                            >
+                                                <div className="w-64 flex-shrink-0 px-4 py-2 flex items-center space-x-2">
+                                                    {a.milestone && <span className="text-xs">⭐</span>}
+                                                    {a.priority === 'Alta' && <span className="text-xs">🔥</span>}
+                                                    <span className="text-sm truncate" title={a.title}>{a.title}</span>
+                                                </div>
+                                                <div className="flex-grow relative h-8">
+                                                    <div 
+                                                        className="gantt-bar absolute h-5 rounded-md top-1.5"
+                                                        style={{ left: `${left}%`, width: `${width}%`, backgroundColor: barColor }}
+                                                    ></div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Legend */}
+                        <div className="flex items-center gap-6 p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 flex-wrap">
+                            <div className="flex items-center space-x-2">
+                                <div className="w-4 h-3 rounded bg-emerald-500"></div>
+                                <span className="text-xs text-slate-500">Completato</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <div className="w-4 h-3 rounded bg-red-500"></div>
+                                <span className="text-xs text-slate-500">Bloccato</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <span className="text-xs">🔥</span>
+                                <span className="text-xs text-slate-500">Priorità Alta</span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <span className="text-xs">⭐</span>
+                                <span className="text-xs text-slate-500">Milestone</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // ============================================
+        // RISKS VIEW
+        // ============================================
+
+        function RisksView({ setSelectedItem }) {
+            const [filter, setFilter] = useState('all');
+
+            const risks = useMemo(() => {
+                if (filter === 'all') return PROJECT_DATA.risks;
+                return PROJECT_DATA.risks.filter(r => r.impact === filter);
+            }, [filter]);
+
+            const stats = {
+                total: PROJECT_DATA.risks.length,
+                alto: PROJECT_DATA.risks.filter(r => r.impact === 'Alto').length,
+                medio: PROJECT_DATA.risks.filter(r => r.impact === 'Medio').length,
+                basso: PROJECT_DATA.risks.filter(r => r.impact === 'Basso').length
+            };
+
+            return (
+                <div className="space-y-6 animate-fade-in">
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <StatCard title="Totale Rischi" value={stats.total} icon="⚠️" />
+                        <StatCard title="Impatto Alto" value={stats.alto} icon="🔴" color="red" />
+                        <StatCard title="Impatto Medio" value={stats.medio} icon="🟡" color="amber" />
+                        <StatCard title="Impatto Basso" value={stats.basso} icon="🟢" color="emerald" />
+                    </div>
+
+                    {/* Filter */}
+                    <div className="flex items-center gap-3 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                        <select
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            className="px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-sm"
+                        >
+                            <option value="all">Tutti gli Impatti</option>
+                            <option value="Alto">Alto</option>
+                            <option value="Medio">Medio</option>
+                            <option value="Basso">Basso</option>
+                        </select>
+                    </div>
+
+                    {/* Risk Matrix */}
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+                        <h2 className="text-lg font-semibold mb-4">Matrice Rischi</h2>
+                        <div className="grid grid-cols-3 gap-4 text-center">
+                            <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-xl">
+                                <div className="text-3xl font-bold text-red-600">{stats.alto}</div>
+                                <div className="text-sm text-red-600">Alto</div>
+                            </div>
+                            <div className="p-4 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
+                                <div className="text-3xl font-bold text-amber-600">{stats.medio}</div>
+                                <div className="text-sm text-amber-600">Medio</div>
+                            </div>
+                            <div className="p-4 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                                <div className="text-3xl font-bold text-emerald-600">{stats.basso}</div>
+                                <div className="text-sm text-emerald-600">Basso</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Risk List */}
+                    <div className="space-y-4">
+                        {risks.map((risk, i) => (
+                            <RiskCardFull key={risk.id} risk={risk} index={i} onClick={() => setSelectedItem({ type: 'risk', data: risk })} />
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // ============================================
+        // COMPONENTS
+        // ============================================
+
+        function StatCard({ title, value, subtitle, icon, color = 'slate', onClick }) {
+            const colors = {
+                slate: 'from-slate-500 to-slate-600',
+                blue: 'from-blue-500 to-blue-600',
+                amber: 'from-amber-500 to-amber-600',
+                emerald: 'from-emerald-500 to-emerald-600',
+                red: 'from-red-500 to-red-600'
+            };
+
+            return (
+                <div 
+                    className={`bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 ${onClick ? 'card-interactive' : ''}`}
+                    onClick={onClick}
+                >
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-sm text-slate-500">{title}</p>
+                            <p className="text-2xl font-bold mt-1">{value}</p>
+                            {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+                        </div>
+                        <span className="text-2xl">{icon}</span>
+                    </div>
+                </div>
+            );
+        }
+
+        function ActivityRow({ activity, index, onClick }) {
+            const ws = PROJECT_DATA.workstreams.find(w => w.id === activity.workstream);
+            return (
+                <div 
+                    className={`flex items-center justify-between p-3 rounded-xl card-interactive bg-slate-50 dark:bg-slate-700/50 priority-${activity.priority?.toLowerCase()}`}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                    onClick={onClick}
+                >
+                    <div className="flex items-center space-x-3 min-w-0">
+                        <div className="w-2 h-8 rounded-full flex-shrink-0" style={{ backgroundColor: ws?.color }}></div>
+                        <div className="min-w-0">
+                            <div className="font-medium text-sm truncate">{activity.title}</div>
+                            <div className="text-xs text-slate-500">{activity.owner}</div>
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-2 flex-shrink-0">
+                        <span className="text-xs px-2 py-1 rounded-full bg-slate-200 dark:bg-slate-600">
+                            {formatDate(activity.due)}
+                        </span>
+                    </div>
+                </div>
+            );
+        }
+
+        function MilestoneRow({ activity, index, onClick }) {
+            const daysUntil = Math.ceil((new Date(activity.due) - new Date()) / (1000 * 60 * 60 * 24));
+            const isUrgent = daysUntil <= 14;
+
+            return (
+                <div 
+                    className={`flex items-center justify-between p-3 rounded-xl card-interactive ${isUrgent ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-slate-50 dark:bg-slate-700/50'}`}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                    onClick={onClick}
+                >
+                    <div className="flex items-center space-x-3 min-w-0">
+                        <span className="text-lg">⭐</span>
+                        <div className="min-w-0">
+                            <div className="font-medium text-sm truncate">{activity.title}</div>
+                            <div className="text-xs text-slate-500">{activity.owner}</div>
+                        </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                        <div className={`font-medium text-sm ${isUrgent ? 'text-amber-600' : ''}`}>
+                            {formatDate(activity.due)}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                            {daysUntil > 0 ? `${daysUntil} giorni` : daysUntil === 0 ? 'Oggi!' : 'Scaduto'}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function KanbanCard({ activity, index, onClick }) {
+            const ws = PROJECT_DATA.workstreams.find(w => w.id === activity.workstream);
+            
+            return (
+                <div 
+                    className={`bg-white dark:bg-slate-800 rounded-xl p-3 card-interactive priority-${activity.priority?.toLowerCase()}`}
+                    style={{ animationDelay: `${index * 30}ms` }}
+                    onClick={onClick}
+                >
+                    <div className="flex items-start justify-between mb-2">
+                        <span className="text-xs text-slate-400">{activity.id}</span>
+                        <div className="flex items-center space-x-1">
+                            {activity.milestone && <span className="text-xs">⭐</span>}
+                            {activity.priority === 'Alta' && <span className="text-xs">🔥</span>}
+                        </div>
+                    </div>
+                    <h4 className="font-medium text-sm leading-snug mb-3">{activity.title}</h4>
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: ws?.color + '20', color: ws?.color }}>
+                            {ws?.name?.split(' ')[0]}
+                        </span>
+                        <span className="text-xs text-slate-500">{activity.owner}</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-400">
+                        <span>{formatDate(activity.start)}</span>
+                        <span>→</span>
+                        <span>{formatDate(activity.due)}</span>
+                    </div>
+                </div>
+            );
+        }
+
+        function RiskCard({ risk, index, onClick }) {
+            return (
+                <div 
+                    className={`p-4 rounded-xl card-interactive risk-${risk.impact.toLowerCase()}`}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                    onClick={onClick}
+                >
+                    <div className="flex items-start justify-between mb-2">
+                        <span className="text-xs text-slate-500">{risk.id}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            risk.impact === 'Alto' ? 'bg-red-100 text-red-700' :
+                            risk.impact === 'Medio' ? 'bg-amber-100 text-amber-700' :
+                            'bg-emerald-100 text-emerald-700'
+                        }`}>
+                            {risk.impact}
+                        </span>
+                    </div>
+                    <h4 className="font-medium text-sm mb-2">{risk.title}</h4>
+                    <p className="text-xs text-slate-500 line-clamp-2">{risk.mitigation}</p>
+                </div>
+            );
+        }
+
+        function RiskCardFull({ risk, index, onClick }) {
+            return (
+                <div 
+                    className={`bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 card-interactive risk-${risk.impact.toLowerCase()}`}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                    onClick={onClick}
+                >
+                    <div className="flex items-start justify-between mb-3">
+                        <div>
+                            <span className="text-xs text-slate-500">{risk.id}</span>
+                            <h3 className="font-semibold text-lg">{risk.title}</h3>
+                        </div>
+                        <span className={`text-sm px-3 py-1 rounded-full font-medium ${
+                            risk.impact === 'Alto' ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' :
+                            risk.impact === 'Medio' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' :
+                            'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300'
+                        }`}>
+                            Impatto {risk.impact}
+                        </span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs text-slate-500 font-medium">Mitigazione</label>
+                            <p className="text-sm mt-1">{risk.mitigation}</p>
+                        </div>
+                        <div>
+                            <label className="text-xs text-slate-500 font-medium">Owner</label>
+                            <p className="text-sm mt-1">{risk.owner}</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function WorkstreamProgress() {
+            const progress = useMemo(() => {
+                return PROJECT_DATA.workstreams.map(ws => {
+                    const wsActs = PROJECT_DATA.activities.filter(a => a.workstream === ws.id);
+                    const done = wsActs.filter(a => a.status === 'Completato').length;
+                    const total = wsActs.length;
+                    return { ...ws, done, total, percent: total > 0 ? Math.round((done / total) * 100) : 0 };
+                }).filter(ws => ws.total > 0);
+            }, []);
+
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {progress.map((ws, idx) => (
+                        <div key={ws.id} className="flex items-center space-x-4">
+                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: ws.color }}></div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex justify-between text-sm mb-1">
+                                    <span className="font-medium truncate">{ws.name}</span>
+                                    <span className="text-slate-500 flex-shrink-0">{ws.done}/{ws.total}</span>
+                                </div>
+                                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                    <div 
+                                        className="h-full rounded-full transition-all duration-500"
+                                        style={{ width: `${ws.percent}%`, backgroundColor: ws.color }}
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        // ============================================
+        // DETAIL MODAL
+        // ============================================
+
+        function DetailModal({ item, onClose }) {
+            const { type, data } = item;
+
+            useEffect(() => {
+                const handleEsc = (e) => e.key === 'Escape' && onClose();
+                window.addEventListener('keydown', handleEsc);
+                return () => window.removeEventListener('keydown', handleEsc);
+            }, [onClose]);
+
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose}></div>
+                    <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
+                        {/* Header */}
+                        <div className="flex items-start justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+                            <div>
+                                <span className="text-sm text-slate-500">{data.id}</span>
+                                <h2 className="text-xl font-semibold mt-1">{data.title}</h2>
+                            </div>
+                            <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 overflow-y-auto max-h-[60vh]">
+                            {type === 'activity' && <ActivityDetail activity={data} />}
+                            {type === 'risk' && <RiskDetail risk={data} />}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-between p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                            <p className="text-sm text-slate-500">
+                                Dashboard di sola lettura
+                            </p>
+                            <button onClick={onClose} className="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-lg text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-600">
+                                Chiudi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ActivityDetail({ activity }) {
+            const ws = PROJECT_DATA.workstreams.find(w => w.id === activity.workstream);
+            return (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm text-slate-500">Workstream</label>
+                            <div className="flex items-center space-x-2 mt-1">
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ws?.color }}></div>
+                                <span>{ws?.name}</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-sm text-slate-500">Owner</label>
+                            <p className="mt-1 font-medium">{activity.owner}</p>
+                        </div>
+                        <div>
+                            <label className="text-sm text-slate-500">Priorità</label>
+                            <p className="mt-1 font-medium">{activity.priority || 'Non definita'}</p>
+                        </div>
+                        <div>
+                            <label className="text-sm text-slate-500">Status</label>
+                            <p className="mt-1 font-medium">{activity.status}</p>
+                        </div>
+                        <div>
+                            <label className="text-sm text-slate-500">Data Inizio</label>
+                            <p className="mt-1">{formatDate(activity.start)}</p>
+                        </div>
+                        <div>
+                            <label className="text-sm text-slate-500">Data Fine</label>
+                            <p className="mt-1">{formatDate(activity.due)}</p>
+                        </div>
+                    </div>
+                    {activity.dependencies && (
+                        <div>
+                            <label className="text-sm text-slate-500">Dipendenze</label>
+                            <p className="mt-1">{activity.dependencies}</p>
+                        </div>
+                    )}
+                    <div className="flex items-center space-x-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        {activity.milestone && <span className="flex items-center space-x-1 text-amber-600"><span>⭐</span><span>Milestone</span></span>}
+                        {activity.release && <span className="flex items-center space-x-1 text-blue-600"><span>📦</span><span>{activity.release}</span></span>}
+                    </div>
+                </div>
+            );
+        }
+
+        function RiskDetail({ risk }) {
+            return (
+                <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm text-slate-500">Impatto</label>
+                            <p className={`mt-1 font-medium ${
+                                risk.impact === 'Alto' ? 'text-red-600' :
+                                risk.impact === 'Medio' ? 'text-amber-600' : 'text-emerald-600'
+                            }`}>{risk.impact}</p>
+                        </div>
+                        <div>
+                            <label className="text-sm text-slate-500">Status</label>
+                            <p className="mt-1 font-medium">{risk.status}</p>
+                        </div>
+                        <div>
+                            <label className="text-sm text-slate-500">Owner</label>
+                            <p className="mt-1 font-medium">{risk.owner}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-sm text-slate-500">Mitigazione</label>
+                        <p className="mt-1">{risk.mitigation}</p>
+                    </div>
+                </div>
+            );
+        }
+
+        // ============================================
+        // UTILS
+        // ============================================
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+        }
+
+        // ============================================
+        // RENDER
+        // ============================================
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
 </body>
 </html>
