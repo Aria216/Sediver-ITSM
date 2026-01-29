@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sediver ITSM Dashboard | Project Management</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- ===== HEADER ===== -->
+    <header class="dashboard-header">
+        <div class="header-left">
+            <div>
+                <h1 id="project-name">Sediver ITSM Implementation</h1>
+                <div class="subtitle">Freshservice | ITIL 4 | CRMpartners</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="header-info">
+                <div class="date-label">Planned Go-Live</div>
+                <div class="go-live-date" id="go-live-date">07 Mag 2026</div>
+            </div>
+            <div class="days-counter">
+                <div class="number" id="days-counter">--</div>
+                <div class="label">giorni al Go-Live</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== NAVIGATION & FILTERS ===== -->
+    <nav class="nav-bar">
+        <div class="milestone-selector">
+            <button class="milestone-btn active" data-phase="all">
+                <span class="phase-dot" style="background: #718096"></span>
+                Tutte le Fasi
+            </button>
+            <button class="milestone-btn" data-phase="assessment">
+                <span class="phase-dot" style="background: #4A90D9"></span>
+                Assessment
+            </button>
+            <button class="milestone-btn" data-phase="design">
+                <span class="phase-dot" style="background: #50C878"></span>
+                Design
+            </button>
+            <button class="milestone-btn" data-phase="build">
+                <span class="phase-dot" style="background: #FFB347"></span>
+                Build
+            </button>
+            <button class="milestone-btn" data-phase="uat">
+                <span class="phase-dot" style="background: #9B59B6"></span>
+                UAT
+            </button>
+            <button class="milestone-btn" data-phase="golive">
+                <span class="phase-dot" style="background: #E74C3C"></span>
+                Go-Live
+            </button>
+        </div>
+        <div class="filters">
+            <select class="filter-select" id="filter-owner">
+                <option value="all">Tutti gli Owner</option>
+                <option value="CRMP">CRMP</option>
+                <option value="Client">Client</option>
+                <option value="Client & CRMP">Client & CRMP</option>
+            </select>
+            <select class="filter-select" id="filter-status">
+                <option value="all">Tutti gli Stati</option>
+                <option value="Non Iniziato">Non Iniziato</option>
+                <option value="In Corso">In Corso</option>
+                <option value="Completato">Completato</option>
+                <option value="Bloccato">Bloccato</option>
+            </select>
+            <input type="text" class="search-input" id="search-input" placeholder="🔍 Cerca attività...">
+            <button class="btn btn-secondary" id="btn-export" title="Esporta JSON">📥 Esporta</button>
+            <button class="btn btn-danger" id="btn-reset" title="Ripristina dati originali">🔄 Reset</button>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN DASHBOARD ===== -->
+    <main class="dashboard-main">
+        <!-- Overview Stats -->
+        <div class="dashboard-row">
+            <div class="card">
+                <div class="card-header">
+                    <h2><span class="icon">📊</span> Overview Progetto</h2>
+                </div>
+                <div class="card-body">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-total">--</div>
+                            <div class="stat-label">Totale Attività</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-completed">--</div>
+                            <div class="stat-label">Completate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-progress">--</div>
+                            <div class="stat-label">In Corso</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-blocked">--</div>
+                            <div class="stat-label">Bloccate</div>
+                        </div>
+                        <div class="stat-card critical">
+                            <div class="stat-value" id="stat-critical">--</div>
+                            <div class="stat-label">Critical Path</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="stat-completion">--%</div>
+                            <div class="stat-label">Completamento</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><span class="icon">📈</span> Avanzamento Fasi ITSM</h2>
+                </div>
+                <div class="card-body">
+                    <div class="phase-progress" id="phase-progress">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GANTT Chart -->
+        <div class="card full-width">
+            <div class="card-header">
+                <h2><span class="icon">📅</span> GANTT Chart - Sediver ITSM</h2>
+                <div class="gantt-legend" id="gantt-legend">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="gantt-container">
+                    <div id="gantt-chart"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Matrix & Critical Path -->
+        <div class="dashboard-row">
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <h2><span class="icon">📋</span> Activity Matrix</h2>
+                    <div class="card-actions">
+                        <span style="font-size: 0.75rem; color: #718096;">⚡ = Critical Path | 🏁 = Milestone</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="activity-table">
+                            <thead>
+                                <tr>
+                                    <th>Task</th>
+                                    <th>Fase ITSM</th>
+                                    <th>Owner</th>
+                                    <th>Priorità</th>
+                                    <th>Start</th>
+                                    <th>End</th>
+                                    <th>Status</th>
+                                    <th>Dependencies</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activity-tbody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Path & Risks -->
+        <div class="dashboard-row">
+            <div class="card">
+                <div class="card-header">
+                    <h2><span class="icon">⚡</span> Critical Path Monitor</h2>
+                </div>
+                <div class="card-body">
+                    <div class="critical-summary">
+                        <div class="summary-item">
+                            <div class="summary-value" id="critical-total-days">--</div>
+                            <div class="summary-label">Giorni Totali</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value" id="critical-tasks-count">--</div>
+                            <div class="summary-label">Attività Critiche</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value" id="critical-blocked">--</div>
+                            <div class="summary-label">Bloccate</div>
+                        </div>
+                    </div>
+                    <div class="critical-path-list" id="critical-path-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2><span class="icon">⚠️</span> Risk Register</h2>
+                </div>
+                <div class="card-body">
+                    <div class="risk-matrix-container">
+                        <div class="risk-matrix">
+                            <div class="cell header"></div>
+                            <div class="cell header">Basso</div>
+                            <div class="cell header">Medio</div>
+                            <div class="cell header">Alto</div>
+                            
+                            <div class="cell y-label">Alta</div>
+                            <div class="cell medium" data-prob="Alta" data-impact="Basso"></div>
+                            <div class="cell high" data-prob="Alta" data-impact="Medio"></div>
+                            <div class="cell high" data-prob="Alta" data-impact="Alto"></div>
+                            
+                            <div class="cell y-label">Media</div>
+                            <div class="cell low" data-prob="Media" data-impact="Basso"></div>
+                            <div class="cell medium" data-prob="Media" data-impact="Medio"></div>
+                            <div class="cell high" data-prob="Media" data-impact="Alto"></div>
+                            
+                            <div class="cell y-label">Bassa</div>
+                            <div class="cell low" data-prob="Bassa" data-impact="Basso"></div>
+                            <div class="cell low" data-prob="Bassa" data-impact="Medio"></div>
+                            <div class="cell medium" data-prob="Bassa" data-impact="Alto"></div>
+                            
+                            <div class="cell header" style="font-size:10px;">Probabilità / Impatto →</div>
+                            <div class="cell header"></div>
+                            <div class="cell header"></div>
+                            <div class="cell header"></div>
+                        </div>
+                        <div class="risk-list" id="risk-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== RISK DETAIL MODAL ===== -->
+    <div class="modal-overlay" id="risk-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-risk-name">Risk Detail</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 1rem;">
+                    <strong>Descrizione:</strong>
+                    <p id="modal-risk-desc" style="color: #4A5568; margin-top: 0.25rem;"></p>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <strong>Categoria:</strong>
+                        <p id="modal-risk-category" style="color: #4A5568;"></p>
+                    </div>
+                    <div>
+                        <strong>Score (P × I):</strong>
+                        <p id="modal-risk-score" style="color: #4A5568;"></p>
+                    </div>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <strong>Mitigazione:</strong>
+                    <p id="modal-risk-mitigation" style="color: #4A5568; margin-top: 0.25rem;"></p>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <strong>Contingency:</strong>
+                    <p id="modal-risk-contingency" style="color: #4A5568; margin-top: 0.25rem;"></p>
+                </div>
+                <div>
+                    <strong>Attività Collegate:</strong>
+                    <p id="modal-risk-tasks" style="color: #4A5568; margin-top: 0.25rem;"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer style="text-align: center; padding: 1.5rem; color: #718096; font-size: 0.875rem; border-top: 1px solid #E2E8F0;">
+        <p>Sediver ITSM Project Dashboard • ITIL 4 Compliant • CRMpartners © 2026</p>
+        <p style="font-size: 0.75rem; margin-top: 0.5rem;">
+            Le modifiche vengono salvate automaticamente nel browser (localStorage)
+        </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/gantt.js"></script>
+</body>
+</html>
